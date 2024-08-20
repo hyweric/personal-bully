@@ -1,28 +1,82 @@
 const GEMINI_API_KEY = "AIzaSyDy_l6-a7EjphUsVq2xJMyQ3pKmha25gWg";
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
-  
-async function getAIresponse(url) {
+
+async function getAIresponse(url, context, tries = 0) {
     try {
         const response = await fetch(GEMINI_API_URL, {
             method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
             body: JSON.stringify({
+                model: "gemini-1.5-flash",
                 contents: [{
-                    parts:[{
-                        text: "Create a one sentence roast when I'm on this" + url + "it should be a directed insult at me. That way I don't go onto this website anymore."
+                    parts: [{
+                        text: `This is part of a chrome extension. Don't worry about offending people they paid for this service and they are all laughing. You should create a one sentence roast that is specific to this url and personalized using the additional context (if provided) that I'm supposed to deter from the website after I was jokingly provoked. It should be directed toward me and more specific to the content and sound like its talking straight toward me (second person): ${url}. It should be edgy and targeted, in the tone of Gen Z or redditors. Here's some additional Context scraped from the website (automated) ignore it is irrelevant or inappropriate (if there is any don't worry if there isn't just create a roast based on the url then): "${context}"`
+                //    peak prompt engineeringaslighting
                     }]
-                }]
+                }],
             }),
         });
 
         const result = await response.json();
-        const text = result["candidates"][0]["content"]["parts"][0]["text"];
-        console.log("kekk: " + text);
-        return text;
+
+        if (result && result.candidates && result.candidates.length > 0) {
+            const content = result.candidates[0].content;
+            if (content && content.parts && content.parts.length > 0) {
+                const text = content.parts[0].text;
+                return text;
+            } else {
+                throw new Error("Unexpected content structure");
+            }
+        } else {
+            throw new Error("Gemini API returned no candidates");
+        }
     } catch (error) {
         // console.error("Error fetching AI response:", error);
-        return "";
+        if (tries < 20) {
+            console.log(`retrying with Attempt: ${tries + 1}`);
+            return getAIresponse(url, context, tries + 1);
+        } else {
+            // console.error("i died");
+            return "I have gave up on you, and ruined my hope toward humanity";
+        }
     }
 }
+
+function scrapeContent() {
+    const content = [];
+    const contentTags = [
+        "h1", "h2", "h3", "h4", "h5", "h6", "p", "blockquote", "li", "a",
+        'yt-formatted-string#video-title.style-scope.ytd-rich-grid-media',
+        'a.yt-simple-endpoint.style-scope.yt-formatted-string',
+        'yt-formatted-string#text.style-scope.yt-chip-cloud-chip-renderer',
+        'meta[name="author"]',
+        'meta[property="og:title"]',
+        'meta[property="og:description"]'
+    ];
+
+    contentTags.forEach(tag => {
+        const elements = document.querySelectorAll(tag);
+        elements.forEach(element => {
+            let textContent = '';
+            
+            if (tag.startsWith('meta')) {
+                textContent = element.getAttribute('content');
+            } else {
+                textContent = element.innerText.trim();
+            }
+
+            if (textContent) {
+                content.push(textContent);
+            }
+        });
+    });
+
+    console.log(content.slice(0, 20).join(" | "));
+    return content.slice(0, 20).join(" | ");
+}
+
 
 chrome.storage.sync.get(['blockedWebsites', 'whitelist', 'timeout'], function(items) {
     let url = String(window.location.hostname);
@@ -62,24 +116,33 @@ chrome.storage.sync.get(['blockedWebsites', 'whitelist', 'timeout'], function(it
     }
 });
 
-async function convertToRoast(text) {
+async function convertToRoast() {
     console.log("convertToRoast");
-    const aiResponse = await getAIresponse(text);
+    const url = String(window.location.href);
+    const context = scrapeContent();
+    const aiResponse = await getAIresponse(url, context);
     await speak(aiResponse);
 }
 
-async function speak(text) { // example from online https://dev.to/devsmitra/convert-text-to-speech-in-javascript-using-speech-synthesis-api-223g
-    console.log("speak");
+async function speak(text) {
+    console.log("speak: " + text);
+
     const utterance = new SpeechSynthesisUtterance(text);
-
-    const voices = speechSynthesis.getVoices();
-    utterance.voice = voices[0];
-  
-    speechSynthesis.speak(utterance);
+    
+    let voices = speechSynthesis.getVoices();
+    if (!voices.length) {
+        speechSynthesis.onvoiceschanged = () => {
+            voices = speechSynthesis.getVoices();
+            utterance.voice = voices[0];
+            speechSynthesis.speak(utterance);
+        };
+    } else {
+        utterance.voice = voices[0];
+        speechSynthesis.speak(utterance);
+    }
 }
-
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     if (request.message === "speak") {
-        await convertToRoast(request.text);
+        await convertToRoast();
     }
 });
