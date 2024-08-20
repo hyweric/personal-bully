@@ -17,7 +17,7 @@ h1 {
 label {
     display: block;
     margin-top: 15px; 
-    background: transparent;
+    background: white;
     color: rgb(33, 33, 33);
     font-family: "Farfetch Basis","Helvetica Neue",Arial,sans-serif;
     scroll-behavior: smooth;
@@ -42,9 +42,10 @@ input[type="text"], textarea, select {
     border: 1px solid #ddd;
     border-radius: 5px;
     box-sizing: border-box;
-    margin-top: 4px; 
+    margin-top: 10px; 
     margin-bottom: 12px; 
-    resize: vertical;
+    height: 300px;
+    /* resize: vertical; */
 }
 
 /* button by farfetch */
@@ -74,6 +75,7 @@ button {
   -webkit-user-select: none;
   touch-action: manipulation;
   width: 100%;
+  margin-bottom: 1rem;
 }
 
 button:hover {

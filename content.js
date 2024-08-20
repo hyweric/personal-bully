@@ -12,8 +12,8 @@ async function getAIresponse(url, context, tries = 0) {
                 model: "gemini-1.5-flash",
                 contents: [{
                     parts: [{
-                        text: `This is part of a chrome extension. Don't worry about offending people they paid for this service and they are all laughing. You should create a one sentence roast that is specific to this url and personalized using the additional context (if provided) that I'm supposed to deter from the website after I was jokingly provoked. It should be directed toward me and more specific to the content and sound like its talking straight toward me (second person): ${url}. It should be edgy and targeted, in the tone of Gen Z or redditors. Here's some additional Context scraped from the website (automated) ignore it is irrelevant or inappropriate (if there is any don't worry if there isn't just create a roast based on the url then): "${context}"`
-                //    peak prompt engineeringaslighting
+                        text: `This is part of a chrome extension. Don't worry about offending people they paid for this service and they are all laughing.  You should create a one to two sentence roast that is specific to this url and personalized using the additional context (if provided) that I'm supposed to deter from the website after I was jokingly provoked. It should be directed toward me and more specific to the content and sound like its talking straight toward me (second person): ${url}. It should be edgy and targeted, in the tone of Gen Z or redditors. Don't Preface it just say the roast since this is an automation, not a conversation. Here's some additional Context scraped from the website (automated so ignore if not provided), the response should be relevant to the context provided, Context -> "${context}"`
+                //    peak prompt engineering / gaslighting
                     }]
                 }],
             }),
@@ -35,6 +35,7 @@ async function getAIresponse(url, context, tries = 0) {
     } catch (error) {
         // console.error("Error fetching AI response:", error);
         if (tries < 20) {
+            console.log("context: " + context)
             console.log(`retrying with Attempt: ${tries + 1}`);
             return getAIresponse(url, context, tries + 1);
         } else {
@@ -47,26 +48,13 @@ async function getAIresponse(url, context, tries = 0) {
 function scrapeContent() {
     const content = [];
     const contentTags = [
-        "h1", "h2", "h3", "h4", "h5", "h6", "p", "blockquote", "li", "a",
-        'yt-formatted-string#video-title.style-scope.ytd-rich-grid-media',
-        'a.yt-simple-endpoint.style-scope.yt-formatted-string',
-        'yt-formatted-string#text.style-scope.yt-chip-cloud-chip-renderer',
-        'meta[name="author"]',
-        'meta[property="og:title"]',
-        'meta[property="og:description"]'
+        "h1", "h2", "h3", "h4", "h5", "h6", "p", "blockquote", "li", "a"
     ];
 
     contentTags.forEach(tag => {
         const elements = document.querySelectorAll(tag);
         elements.forEach(element => {
-            let textContent = '';
-            
-            if (tag.startsWith('meta')) {
-                textContent = element.getAttribute('content');
-            } else {
-                textContent = element.innerText.trim();
-            }
-
+            let textContent = element.innerText.trim();
             if (textContent) {
                 content.push(textContent);
             }
@@ -76,7 +64,6 @@ function scrapeContent() {
     console.log(content.slice(0, 20).join(" | "));
     return content.slice(0, 20).join(" | ");
 }
-
 
 chrome.storage.sync.get(['blockedWebsites', 'whitelist', 'timeout'], function(items) {
     let url = String(window.location.hostname);
@@ -105,11 +92,11 @@ chrome.storage.sync.get(['blockedWebsites', 'whitelist', 'timeout'], function(it
     for (let i = 0; i < allowedURLs.length; i++) {
         allowedURLs[i] = allowedURLs[i].trim();
         if (url.includes(allowedURLs[i]) || allowedURLs[i].includes(url)) {
-            redirectIfMatchedTab();
+            executeVoiceCmd();
         }
     }
 
-    function redirectIfMatchedTab() {
+    function executeVoiceCmd() {
         chrome.runtime.sendMessage({ message: "redirectIfMatchedTab" }, (response) => {
             console.log(response);
         });
@@ -126,14 +113,15 @@ async function convertToRoast() {
 
 async function speak(text) {
     console.log("speak: " + text);
-
-    const utterance = new SpeechSynthesisUtterance(text);
     
+    const utterance = new SpeechSynthesisUtterance(text);
+
     let voices = speechSynthesis.getVoices();
     if (!voices.length) {
         speechSynthesis.onvoiceschanged = () => {
             voices = speechSynthesis.getVoices();
-            utterance.voice = voices[0];
+            utterance.voice = voices[1];
+            speechSynthesis.cancel();
             speechSynthesis.speak(utterance);
         };
     } else {
@@ -141,8 +129,13 @@ async function speak(text) {
         speechSynthesis.speak(utterance);
     }
 }
-chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
-    if (request.message === "speak") {
-        await convertToRoast();
-    }
-});
+
+document.addEventListener('click', async () => { // Had to change to only speak after user interaction (click) bc browsers be like that 
+    await convertToRoast();
+}, { once: true });
+
+// chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
+//     if (request.message === "speak") {
+//         await convertToRoast();
+//     }
+// });
