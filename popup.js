@@ -8,7 +8,6 @@ document.getElementById('toggleButton').addEventListener('change', function() {
 
         toggleSwitch.checked = enabled; //pos of switch
         statusLabel.textContent = enabled ? 'Enabled' : 'Disabled'; //status symbol text 
-        // statusLabel.style.color = enabled ? '#00CC66' : 'red'; //status symbol color 
     });
 });
 
@@ -19,7 +18,6 @@ window.onload = function() {
     chrome.storage.sync.get('enabled', function(items) {
         toggleSwitch.checked = items.enabled; 
         statusLabel.textContent = items.enabled ? 'Enabled' : 'Disabled'; 
-        // statusLabel.style.color = items.enabled ? '#00CC66' : 'red'; 
     });
 };
 
@@ -39,10 +37,10 @@ const saveOptions = () => {
 // Store in chrome storage
 const restoreOptions = () => {
     chrome.storage.sync.get(
-        { blockedWebsites: 'Add Blocked Websites here \n Separate each one with a new line' }, 
+        { blockedWebsites: 'Add Websites here \n Separate each one with a new line' }, 
         (items) => {
             try {
-                document.getElementById('blockedWebsites').value = items.blockedWebsites || 'Add Blocked Websites here \n Separate each one with a new line';
+                document.getElementById('blockedWebsites').value = items.blockedWebsites || 'Add Websites here \n Separate each one with a new line';
             } catch (error) {
                 console.log('Error:', error);
             }

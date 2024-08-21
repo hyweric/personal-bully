@@ -1,5 +1,5 @@
 body {
-    font-family: "Farfetch Basis","Helvetica Neue",Arial,sans-serif;
+    font-family: "Farfetch Basis","Helvetica Neue",Arial,sans-serif; 
     margin: 0;
     padding: 0;
     background-color: #f0f0f0;
@@ -44,7 +44,7 @@ input[type="text"], textarea, select {
     box-sizing: border-box;
     margin-top: 10px; 
     margin-bottom: 12px; 
-    height: 300px;
+    height: 200px;
     /* resize: vertical; */
 }
 
@@ -102,12 +102,11 @@ ul {
     transform: translate3d(0, 0, 0);
     animation: popOut 1s ease-in-out;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-    padding-top: 12px; 
     padding-left: 28px; 
     padding-right: 28px; 
     padding-bottom: 8px; 
     background-color: white;
-    border-radius: 10px;
+    /* border-radius: 10px; */
     position: relative;
     z-index: 1;
 }

@@ -1,11 +1,11 @@
-<!-- using popup as options page -->
 <!DOCTYPE html>
 <html>
   <head>
-    <title> Your Personal Bully </title>
+    <title> Personal Bully </title>
     <link rel = "stylesheet" href = "./popup.css">
   </head>
   <body>
+    <h1 style = "font-family: 'Comic Sans MS', 'Comic Sans', cursive;"> Personal Bully </h1>
     <div class = "container">
       <div class="switch-container">
         <label class="switch">
@@ -15,16 +15,18 @@
         <span id="statusLabel"></span>
     </div>   
     <div class = "divider"></div>
-    <h1>Options: </h1>
-    <label for="blockedWebsites"> Blocked Websites to Redirect (new line):</label>
+    <h1>Usage: </h1>
+
+    <h3 style = "text-align: left;"> 1. Go on a website listed below. <br>
+         2. Click Anywhere (even empty spaces!) <br>
+         3. Get Roasted and go cry<br>
+    </h4>
+    <div class = "divider"></div>
+    <label for="blockedWebsites"> <strong> Websites to Roast (separate on new line): </strong></label>
     <textarea type = "text2" id="blockedWebsites"></textarea>
     <div id="status"></div>
     <button id="save">Save</button>
     <br>
-    <!-- <label for="routine">Unblocked Website (One max):</label>
-    <ul id="whitelist">
-
-    </ul> -->
   </div>
     
     <script src="popup.js"></script>
