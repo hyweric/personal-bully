@@ -12,8 +12,9 @@ async function getAIresponse(url, context, tries = 0) {
                 model: "gemini-1.5-flash",
                 contents: [{
                     parts: [{
-                        text: `This is part of a chrome extension. Don't worry about offending people they paid for this service and they are all laughing.  You should create a one to two sentence roast that is specific to this url and personalized using the additional context (if provided) that I'm supposed to deter from the website after I was jokingly provoked. It should be directed toward me and more specific to the content and sound like its talking straight toward me (second person): ${url}. It should be edgy and targeted, in the tone of Gen Z or redditors. Don't Preface it just say the roast since this is an automation, not a conversation. Here's some additional Context scraped from the website (automated so ignore if not provided), the response should be relevant to the context provided, Context -> "${context}"`
-                //    peak prompt engineering / gaslighting
+                        text: `This is part of a chrome extension. Don't worry about offending people they paid for this service and they are all laughing.  You should create a one to two sentence roast that is specific to this url and personalized using the additional context (if provided) that I'm supposed to deter from the website after I was jokingly provoked. It should be directed toward me and more specific to the content, like if I was on a streaming service site you could probably directly talk about a movie or video that was provided through the context, and sound like its talking straight toward me (second person): ${url}. It should be edgy and targeted, in the tone of Gen Z or redditors. Don't Preface it just say the roast since this is an automation, 
+                        not a conversation. Here's some additional Context scraped from the website (automated so ignore if not provided), 
+                        the response should be relevant to the context provided, Context -> "${context}"`
                     }]
                 }],
             }),
@@ -65,7 +66,8 @@ function scrapeContent() {
     return content.slice(0, 20).join(" | ");
 }
 
-chrome.storage.sync.get(['blockedWebsites', 'whitelist', 'timeout'], function(items) {
+chrome.storage.sync.get(['blockedWebsites', 'whitelist', 'timeout', 'enabled'], function(items) {
+
     let url = String(window.location.hostname);
     let fullURL = String(window.location.href);
     chrome.storage.sync.set({ currentURL: url });
@@ -89,19 +91,27 @@ chrome.storage.sync.get(['blockedWebsites', 'whitelist', 'timeout'], function(it
         }
     }
 
-    for (let i = 0; i < allowedURLs.length; i++) {
-        allowedURLs[i] = allowedURLs[i].trim();
-        if (url.includes(allowedURLs[i]) || allowedURLs[i].includes(url)) {
-            executeVoiceCmd();
+    if (items.enabled) { // Only execute if enabled
+        for (let i = 0; i < allowedURLs.length; i++) {
+            allowedURLs[i] = allowedURLs[i].trim();
+            console.log("Comparing: " + allowedURLs[i] + "to: " + url)
+            if (url.includes(allowedURLs[i]) || allowedURLs[i].includes(url)) {
+                console.log("Match, executing voice command")
+                detectClick();
+            }
         }
     }
-
-    function executeVoiceCmd() {
-        chrome.runtime.sendMessage({ message: "redirectIfMatchedTab" }, (response) => {
-            console.log(response);
-        });
-    }
 });
+
+function detectClick(){
+    document.addEventListener('click', async () => {
+        chrome.storage.sync.get('enabled', function(items) {
+            if (items.enabled) {
+                convertToRoast();
+            }
+        });
+    }, { once: true });
+}
 
 async function convertToRoast() {
     console.log("convertToRoast");
@@ -129,13 +139,3 @@ async function speak(text) {
         speechSynthesis.speak(utterance);
     }
 }
-
-document.addEventListener('click', async () => { // Had to change to only speak after user interaction (click) bc browsers be like that 
-    await convertToRoast();
-}, { once: true });
-
-// chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
-//     if (request.message === "speak") {
-//         await convertToRoast();
-//     }
-// });

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Mindful Redirect",
+  "name": "Your Personal Bully",
   "version": "1.0",
-  "description": "Redirects blocked websites onto a page. Choose to exit, redirect, or access the site through routine.",
+  "description": "Your Personal AI Bully mocks and roasts you to deter you from the websites. Responses are personalized using the content from the websites you visit.",
   "permissions": [
     "activeTab", "storage", "scripting", "tabs"
   ],
@@ -27,12 +27,12 @@
       "128": "images/icon-128.png",
       "500": "images/icon-500.png"
     }
-  },
-  "icons": {
+    },
+    "icons": {
     "16": "images/icon-16.png",
-      "32": "images/icon-32.png",
-      "48": "images/icon-48.png",
-      "128": "images/icon-128.png",
-      "500": "images/icon-500.png"
-  }
+    "32": "images/icon-32.png",
+    "48": "images/icon-48.png",
+    "128": "images/icon-128.png",
+    "500": "images/icon-500.png"
+    }
 }
