@@ -2,9 +2,9 @@
   "manifest_version": 3,
   "name": "Your Personal Bully",
   "version": "1.0",
-  "description": "Your Personal AI Bully mocks and roasts you to deter you from the websites. Responses are personalized using the content from the websites you visit.",
+  "description": "Your Personal Bully mocks and roasts you to deter you from websites, personalized to each individual.",
   "permissions": [
-    "activeTab", "storage", "scripting", "tabs"
+    "activeTab", "storage", "tabs"
   ],
   "background": {
      "service_worker": "dist/background.bundle.js" 

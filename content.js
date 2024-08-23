@@ -41,7 +41,7 @@ async function getAIresponse(url, context, tries = 0) {
             return getAIresponse(url, context, tries + 1);
         } else {
             // console.error("i died");
-            return "I have gave up on you, and ruined my hope toward humanity";
+            return "I have gave up on you, but also me, since an error occured somehow.";
         }
     }
 }
